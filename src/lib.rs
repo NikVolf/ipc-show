@@ -2,11 +2,13 @@
 extern crate futures;
 extern crate serde;
 extern crate bincode;
+extern crate tokio_core;
+extern crate byteorder;
 
 mod common;
 mod dispatcher;
 mod test_socket;
-mod service_dispatcher;
+mod codecs;
 
 use futures::{future, Future, BoxFuture};
 use std::sync::Arc;
