@@ -6,6 +6,7 @@ extern crate bincode;
 mod common;
 mod dispatcher;
 mod test_socket;
+mod service_dispatcher;
 
 use futures::{future, Future, BoxFuture};
 use std::sync::Arc;
