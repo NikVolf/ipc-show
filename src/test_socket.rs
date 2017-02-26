@@ -2,7 +2,7 @@ use std::sync::RwLock;
 use futures::stream::Stream;
 use futures::sink::Sink;
 use futures::{Async, AsyncSink};
-use dispatcher::{TransportError, IpcSocket};
+use dispatcher::{TransportError};
 
 struct ReadPayload {
     data: Vec<u8>,
@@ -60,8 +60,6 @@ impl Sink for TestSocket {
         Ok(Async::Ready(()))        
     }
 }
-
-impl IpcSocket for TestSocket { }
 
 #[cfg(test)]
 mod tests {

@@ -9,4 +9,6 @@ serde_derive = "0.9"
 serde = "0.9"
 bincode = { git = "https://github.com/TyOverby/bincode" }
 tokio-core = "*"
+tokio-service = "*"
+tokio-proto = "*"
 byteorder = "*"

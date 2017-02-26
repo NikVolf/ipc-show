@@ -3,18 +3,23 @@ extern crate futures;
 extern crate serde;
 extern crate bincode;
 extern crate tokio_core;
+extern crate tokio_proto;
+extern crate tokio_service;
 extern crate byteorder;
 
 mod common;
 mod dispatcher;
 mod test_socket;
-mod codecs;
+mod proto;
+mod service;
 
-use futures::{future, Future, BoxFuture};
 use std::sync::Arc;
+use futures::{future, Future, BoxFuture};
+use tokio_core::io::Io;
 
 pub use common::{Block, BlockError};
-pub use dispatcher::{Dispatcher, IpcSocket, ServiceId, Request, Response, IpcInterface, ServiceError, ServiceRequest, ServiceResponse};
+pub use dispatcher::{Dispatcher, ServiceId, Request, Response, IpcInterface, ServiceRequest};
+pub use service::ServiceError;
 use test_socket::TestSocket;
 
 pub type IpcFuture<T, E> = futures::BoxFuture<T, E>;
@@ -28,19 +33,18 @@ pub struct ClientService {
     client: Box<Client>,
 }
 
-pub struct IpcClient<T: IpcSocket> {
+pub struct IpcClient<T: Io + 'static> {
     service_id: ServiceId,
-    dispatcher: Arc<Dispatcher<T>>,
+    dispatcher: Dispatcher<T>,
 }
 
-impl<T: IpcSocket> Client for IpcClient<T> {
+impl<T: Io + 'static> Client for IpcClient<T> {
 
     // CODEGEN METHOD
     fn load(&self, number: u64) -> IpcFuture<Block, BlockError> {
         let payload = bincode::serialize(&number, bincode::SizeLimit::Infinite).expect("Known serializable");
 
         self.dispatcher.invoke(Request {
-            id: 0,
             method_id: 0,
             service_id: self.service_id,
             payload: payload,
@@ -62,7 +66,7 @@ impl<T: IpcSocket> Client for IpcClient<T> {
 }
 
 impl IpcInterface for Client {
-    fn dispatch(&self, request: ServiceRequest) -> BoxFuture<ServiceResponse, ServiceError> {
+    fn dispatch(&self, request: ServiceRequest) -> BoxFuture<Response, ServiceError> {
         // CODEGEN RESULT START
         match request.method_id {
             0 => {
@@ -70,13 +74,13 @@ impl IpcInterface for Client {
                 self.load(param).then(|res| {
                     match res {
                         Ok(response) => {
-                            Ok(ServiceResponse { 
+                            Ok(Response { 
                                 success: true, 
                                 payload: bincode::serialize(&response, bincode::SizeLimit::Infinite).unwrap(),
                             })
                         },
                         Err(err) => {
-                            Ok(ServiceResponse { 
+                            Ok(Response { 
                                 success: false, 
                                 payload: bincode::serialize(&err, bincode::SizeLimit::Infinite).unwrap() 
                             })
