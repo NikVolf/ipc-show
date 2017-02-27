@@ -2,13 +2,13 @@ use std::io;
 use std::default::Default;
 use tokio_core::io::{Codec, EasyBuf, Framed, Io};
 use tokio_proto::multiplex::{RequestId, ServerProto, ClientProto};
-use byteorder::{BigEndian, LittleEndian, ByteOrder};
+use byteorder::{LittleEndian, ByteOrder};
 use bincode;
 use serde;
 
 use dispatcher::{Request, Response};
 
-struct BincodeCodec<I: serde::Deserialize, O: serde::Serialize> {
+pub struct BincodeCodec<I: serde::Deserialize, O: serde::Serialize> {
     _phantom_input: ::std::marker::PhantomData<I>,
     _phantom_output: ::std::marker::PhantomData<O>,    
 }

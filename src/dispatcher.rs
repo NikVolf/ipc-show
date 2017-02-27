@@ -1,22 +1,12 @@
 use std::io;
-use std::sync::{RwLock, Arc, Mutex};
-use std::collections::HashMap;
 
-use futures::{self, task, Future, Async, BoxFuture};
-use futures::stream::Stream;
-use futures::sink::Sink;
-
+use futures::{Future, BoxFuture};
 use tokio_proto::multiplex::ClientService;
 use tokio_core::io::Io;
 use tokio_service::Service;
 
-use bincode;
-
 use service::ServiceError;
-use proto::{IpcProto};
-
-#[derive(Debug)]
-pub struct TransportError;
+use proto::IpcProto;
 
 pub type MethodId = u16;
 pub type ServiceId = u16;

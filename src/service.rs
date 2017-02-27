@@ -1,12 +1,10 @@
-use bincode;
 use std::io;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use std::collections::HashMap;
-use futures::{future, BoxFuture, Future};
+use futures::{BoxFuture, Future};
 use tokio_service::Service;
-use tokio_proto::multiplex::ServerProto;
 
-use dispatcher::{ServiceId, IpcInterface, Request, Response, ServiceRequest, TransportError};
+use dispatcher::{ServiceId, IpcInterface, Request, Response, ServiceRequest};
 
 #[derive(Debug)]
 pub struct ServiceError;

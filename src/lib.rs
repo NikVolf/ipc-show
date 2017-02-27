@@ -12,14 +12,14 @@ mod dispatcher;
 mod proto;
 mod service;
 
-use std::sync::{Mutex, Arc};
+use std::sync::Arc;
 use futures::{future, Future, BoxFuture};
 use tokio_core::io::Io;
 use tokio_proto::multiplex;
 
 pub use common::{Block, BlockError};
 pub use dispatcher::{Dispatcher, ServiceId, Request, Response, IpcInterface, ServiceRequest};
-pub use service::ServiceError;
+pub use service::{ServiceDispatcher, ServiceError};
 use proto::IpcProto;
 
 pub type IpcFuture<T, E> = futures::BoxFuture<T, E>;
@@ -40,16 +40,14 @@ impl Client for ClientService {
 pub struct IpcClient<T: Io + 'static> {
     service_id: ServiceId,
     dispatcher: Dispatcher<T>,
-    core: Mutex<::tokio_core::reactor::Core>,
 }
 
 // CODEGEN CONSTRUCTOR
 impl<T: Io + 'static> IpcClient<T> {
-    fn new(service_id: ServiceId, client_service: multiplex::ClientService<T, IpcProto>) -> Self {
+    pub fn new(service_id: ServiceId, client_service: multiplex::ClientService<T, IpcProto>) -> Self {
         IpcClient {
             dispatcher: Dispatcher::new(client_service),
             service_id: service_id,
-            core: Mutex::new(::tokio_core::reactor::Core::new().unwrap()),
         }
     }
 }
@@ -121,7 +119,7 @@ mod tests {
     use std::sync::{Arc, Mutex};
     use std::thread;
     use tokio_proto::{TcpServer, TcpClient};
-    use service::{ServiceDispatcher, ServiceError};
+    use service::ServiceDispatcher;
     use proto::{IpcProto};
     use super::{IpcClient, Client, ClientService, ClientDispatch};
     use dispatcher::IpcInterface;
