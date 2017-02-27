@@ -44,11 +44,15 @@ pub trait IpcInterface {
 }
 
 pub struct Dispatcher<T: Io + 'static> {
-    client_service: ClientService<T, IpcClientProto>,
+    service: ClientService<T, IpcClientProto>,
 }
 
 impl<T: Io + 'static> Dispatcher<T> {
+    pub fn new(service: ClientService<T, IpcClientProto>) -> Self {
+        Dispatcher { service: service }
+    }
+
     pub fn invoke(&self, request: Request) -> BoxFuture<Response, io::Error> {
-        self.client_service.call(request).boxed()
+        self.service.call(request).boxed()
     } 
 }
