@@ -13,7 +13,7 @@ use tokio_service::Service;
 use bincode;
 
 use service::ServiceError;
-use proto::{IpcProto, IpcClientProto};
+use proto::{IpcProto};
 
 #[derive(Debug)]
 pub struct TransportError;
@@ -44,11 +44,11 @@ pub trait IpcInterface {
 }
 
 pub struct Dispatcher<T: Io + 'static> {
-    service: ClientService<T, IpcClientProto>,
+    service: ClientService<T, IpcProto>,
 }
 
 impl<T: Io + 'static> Dispatcher<T> {
-    pub fn new(service: ClientService<T, IpcClientProto>) -> Self {
+    pub fn new(service: ClientService<T, IpcProto>) -> Self {
         Dispatcher { service: service }
     }
 

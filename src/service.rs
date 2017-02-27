@@ -8,6 +8,7 @@ use tokio_proto::multiplex::ServerProto;
 
 use dispatcher::{ServiceId, IpcInterface, Request, Response, ServiceRequest, TransportError};
 
+#[derive(Debug)]
 pub struct ServiceError;
 
 pub type Services = HashMap<ServiceId, Arc<IpcInterface>>;
@@ -23,7 +24,7 @@ impl ServiceDispatcher {
         }
     }
 
-    pub fn register_service(&mut self, service_id: ServiceId, service: Arc<IpcInterface>) -> Result<(), ServiceError> {
+    pub fn register(&mut self, service_id: ServiceId, service: Arc<IpcInterface>) -> Result<(), ServiceError> {
         if let Some(_) = self.services.get(&service_id) {
             return Err(ServiceError);
         }
@@ -32,7 +33,7 @@ impl ServiceDispatcher {
         Ok(())
     }
 
-    pub fn deregister_service(&mut self, service_id: ServiceId) -> Result<(), ServiceError> {
+    pub fn deregister(&mut self, service_id: ServiceId) -> Result<(), ServiceError> {
         if self.services.remove(&service_id).is_none() {
             Err(ServiceError)
         } else {
@@ -40,7 +41,7 @@ impl ServiceDispatcher {
         }
     }
 
-    pub fn service(&self, service_id: ServiceId) -> &IpcInterface {
+    pub fn get(&self, service_id: ServiceId) -> &IpcInterface {
         &*self.services[&service_id]
     }
 }
@@ -52,7 +53,7 @@ impl Service for ServiceDispatcher {
     type Future = BoxFuture<Response, io::Error>;
 
     fn call(&self, req: Request) -> Self::Future {
-        let service = self.service(req.service_id);
+        let service = self.get(req.service_id);
         let service_request = ServiceRequest { method_id: req.method_id, payload: req.payload };
         service.dispatch(service_request).map_err(|_| io::Error::new(io::ErrorKind::Other, "TODO: service error")).boxed()
     }
